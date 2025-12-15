@@ -409,6 +409,15 @@ class ValidationPasswordRuleTest extends TestCase
 
         $this->passes(Password::required(), ['Password123', 'password123']);
         $this->passes([Password::required()], ['Password123', 'password123']);
+
+        $v = new Validator(
+            resolve('translator'),
+            [],
+            ['password' => Password::required()]
+        );
+
+        $this->assertFalse($v->passes());
+        $this->assertArrayHasKey('password', $v->messages()->toArray());
     }
 
     public function testSometimes()
@@ -441,6 +450,25 @@ class ValidationPasswordRuleTest extends TestCase
 
         $this->passes(Password::sometimes(), ['Password123', 'password123']);
         $this->passes([Password::sometimes()], ['Password123', 'password123']);
+
+        $v = new Validator(
+            resolve('translator'),
+            [],
+            ['password' => Password::sometimes()]
+        );
+
+        $this->assertTrue($v->passes());
+    }
+
+    public function testMissingFieldWithoutRequired()
+    {
+        $v = new Validator(
+            resolve('translator'),
+            [],
+            ['password' => Password::min(8)]
+        );
+
+        $this->assertTrue($v->passes());
     }
 
     protected function passes($rule, $values)
